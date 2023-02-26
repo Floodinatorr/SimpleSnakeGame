@@ -1,13 +1,25 @@
 var canvas = document.getElementById("gameCanvas");
 var ctx = canvas.getContext("2d");
-canvas.width = 600;
-canvas.height = 600;
 
-gameOver = false;
+var gamePlay = document.getElementById("gamePlay");
+var gameOverDiv = document.getElementById("gameOver");
+var scoreText = document.getElementById("scoreText");
+var score = 0;
+
+gamePlay.classList.toggle("gamePlayShow");
+
+if(screen.width >= 768){
+    canvas.width = 600;
+    canvas.height = 600;
+} else {
+    canvas.width = screen.width - 48;
+    canvas.height = screen.width - 48;
+}
+
 
 // Make the canvas for game
 
-pixel_count = 20;
+pixel_count = 40;
 pixel_size = canvas.width / pixel_count;
 
 var pixels = new Array(pixel_count);
@@ -24,143 +36,135 @@ for (let i = 0; i < pixel_count; i++) {
     }
 }
 
-for (let x = 0; x < pixel_count; x++) {
-    for (let y = 0; y < pixel_count; y++) {
-        if ((x + y) % 2) {
-            ctx.fillStyle = "black";
-            ctx.fillRect(x * pixel_size, y * pixel_size, pixel_size, pixel_size);
-            ctx.fillStyle = "white";
-            ctx.fillText(pixels[x][y], x * pixel_size + 10, y * pixel_size + 20);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle="#FF0000";
-            ctx.strokeRect(x * pixel_size, y * pixel_size, pixel_size, pixel_size);
-        } else {
-            ctx.fillStyle = "white";
-            ctx.fillRect(x * pixel_size, y * pixel_size, pixel_size, pixel_size);
-            ctx.fillStyle = "black";
-            ctx.fillText(pixels[x][y], x * pixel_size + 10, y * pixel_size + 20);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle="#FF0000";
-            ctx.strokeRect(x * pixel_size, y * pixel_size, pixel_size, pixel_size);
-        }
-    }
-}
-
-
 // Create a snake
 
-default_length = 3;
+default_length = 5;
 
-var clearCanvas = function () {
-    setInterval(function () {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        snake.moveTo();
-    }, 0);
-}    
-
-var snake = {
-    x: 0,
-    y: 0,
-    xSpeed: 0,
-    ySpeed: 0,
-    total: 0,
-    tail: [],
-    tailLenght: default_length,
-    color: "red",
-    direction: "D", // D = Down, U = Up, L = Left, R = Right
-    draw: function (snakeX, snakeY) {
-        this.x = snakeX;
-        this.y = snakeY;
-        ctx.fillStyle = this.color;
-        for (let i = 0; i < this.tailLenght; i++) {
-            if(this.direction == "R"){
-                ctx.fillRect((snakeX + i) * pixel_size, snakeY * pixel_size, pixel_size, pixel_size);
-            } else if (this.direction == "L"){
-                ctx.fillRect((snakeX - i) * pixel_size, snakeY * pixel_size, pixel_size, pixel_size);
-            } else if (this.direction == "U"){
-                ctx.fillRect(snakeX * pixel_size, (snakeY - i) * pixel_size, pixel_size, pixel_size);
-            } else if (this.direction == "D"){
-                ctx.fillRect(snakeX * pixel_size, (snakeY + i) * pixel_size, pixel_size, pixel_size);
-            }
+var Snake = function () {
+    this.x = 1;
+    this.y = 1;
+    this.moveX = 1;
+    this.moveY = 0;
+    this.length = default_length;
+    this.body = [];
+    this.color = "red";
+    this.lastPart = [];
+    this.draw = function () {
+        for (let i = 0; i < this.body.length; i++) {
+            let part = this.body[i];
+            ctx.fillStyle = this.color;
+            ctx.fillRect(part.x * pixel_size, part.y * pixel_size, pixel_size, pixel_size);
         }
-    },
-    moveToY: function () {
-        if (this.direction == "U") {
-            snake.clear();
-            this.y -= 1;
-            snake.draw(this.x, this.y);
-        } else if (this.direction == "D") {
-            snake.clear();
-            this.y += 1;
-            snake.draw(this.x, this.y);
+    };
+    this.move = function () {
+        body = this.body;
+        for (let i = 0; i < this.body.length; i++) {
+            ctx.clearRect(body[i].x * pixel_size, body[i].y * pixel_size, pixel_size, pixel_size);
         }
-    },
-    moveToX: function () {
-        if (this.direction == "L") {
-            snake.clear();
-            this.x -= 1;
-            snake.draw(this.x, this.y);
-        } else if (this.direction == "R") {
-            snake.clear();
-            this.x += 1;
-            snake.draw(this.x, this.y);
-        }
-    },
-    clear: function () {
-        if (this.direction == "R"){
-            for (let i = 0; i < this.tailLenght; i++) {
-                ctx.clearRect((this.x + i) * pixel_size, this.y * pixel_size, pixel_size, pixel_size);
-            }
-        } else if (this.direction == "L"){
-            for (let i = 0; i < this.tailLenght; i++) {
-                ctx.clearRect((this.x - i) * pixel_size, this.y * pixel_size, pixel_size, pixel_size);
-            }
-        } else if (this.direction == "U"){
-            for (let i = 0; i < this.tailLenght; i++) {
-                ctx.clearRect(this.x * pixel_size, (this.y - i) * pixel_size, pixel_size, pixel_size);
-            }
-        } else if (this.direction == "D"){
-            for (let i = 0; i < this.tailLenght; i++) {
-                ctx.clearRect(this.x * pixel_size, (this.y + i) * pixel_size, pixel_size, pixel_size);
-            }
-        }
-    },
+        firstItem = {
+            x: body[0].x + this.moveX,
+            y: body[0].y + this.moveY
+        };
+        this.lastPart = {
+            x: body[0].x,
+            y: body[0].y
+        };
+        body.unshift(firstItem);
+        body.pop();
+    };
+    this.clear = function () {
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+    };
 }
 
-snake.x = pixel_size + 1;
-snake.y = pixel_size + 1;
-snake.xSpeed = 1;
-snake.ySpeed = 1;
-snake.direction = "D";
-snake.draw(1,1);
-
-test = document.addEventListener("keydown", keyDown);
-
-function keyDown(event) {
-    switch (event.keyCode) {
-        //case "KeyS":
-        case 40:
-            snake.direction = "D";
-            break;
-        //case "KeyW":
-        case 38:
-            snake.direction = "U";
-            break;
-        //case "KeyA":
-        case 37:
-            snake.direction = "L";
-            break;
-        //case "KeyD":
-        case 39:
-            snake.direction = "R";
-            break;     
-        default:
-            break;
+var food = {
+    x: 0,
+    y: 0,
+    color: "green",
+    draw: function () {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x * pixel_size, this.y * pixel_size, pixel_size, pixel_size);
+    },
+    clear: function () {
+        ctx.clearRect(this.x * pixel_size, this.y * pixel_size, pixel_size, pixel_size);
+    },
+    random: function () {
+        this.x = Math.floor(Math.random() * pixel_count);
+        this.y = Math.floor(Math.random() * pixel_count);
     }
 }
 
-for (let i = 0; i < 100; i++) {
-    setTimeout(function () {
-        snake.moveToY();
-    }, 1000 * i);
+function writeScore() {
+    scoreText.innerHTML = score;
+}
+
+function controlBorders(snakeParams){
+    return snakeParams.body[0].x < 0 || snakeParams.body[0].x > pixel_count - 1 || snakeParams.body[0].y < 0 || snakeParams.body[0].y > pixel_count - 1;
+}
+
+
+function gameOverFunc(snakeParam) {
+    snakeParam.clear();
+    gameOverDiv.classList.toggle("gameOverShow");
+}
+
+
+
+function main() {
+    var snake = new Snake();
+    score = 0;
+    for (let i = 0; i < default_length; i++) {
+        snake.body.push({
+            x: snake.x + i,
+            y: snake.y
+        });
+    }
+    snake.draw();
+    document.addEventListener("keydown", function (e) {
+        right = snake.moveX === 1 && snake.moveY === 0;
+        left = snake.moveX === -1 && snake.moveY === 0;
+        up = snake.moveX === 0 && snake.moveY === -1;
+        down = snake.moveX === 0 && snake.moveY === 1;
+        console.log(right, left, up, down);
+        if (e.keyCode == 37 && !left && !right) {
+            snake.moveX = -1;
+            snake.moveY = 0;
+        } else if (e.keyCode == 38 && !up && !down) {
+            snake.moveX = 0;
+            snake.moveY = -1;
+        } else if (e.keyCode == 39 && !right && !left) {
+            snake.moveX = 1;
+            snake.moveY = 0;
+        } else if (e.keyCode == 40 && !down && !up) {
+            snake.moveX = 0;
+            snake.moveY = 1;
+        }
+    });
+    food.random();
+    food.draw();
+    if(gamePlay.classList.contains("gamePlayShow")){
+        gamePlay.classList.remove("gamePlayShow");
+    }
+    interval = setInterval(function () {
+        if (snake.body[0].x === food.x && snake.body[0].y === food.y) {
+            snake.body.push(snake.lastPart);
+            food.clear();
+            score++;
+            food.random();
+            food.draw();
+        }
+        writeScore();
+        snake.move();
+        snake.draw();
+        if (controlBorders(snake)){
+            gameOverFunc(snake);
+            clearInterval(interval);
+        }
+    }, 100);
+    return interval;
+}
+
+function restartGame(){
+    main();
+    gameOverDiv.classList.remove("gameOverShow");
 }

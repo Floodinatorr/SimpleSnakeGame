@@ -6,17 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Snake Game</title>
     <link rel="stylesheet" href="src/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 </head>
 <body>
     <main>
         <section id="gameDiv" class="gameDiv">
+            <h1>Simple Snake Game</h1>
+            <a target="_blank" href="https://github.com/Floodinatorr" class="userLink">by Floodinatorr</a>
             <div id="gameCanvasDiv" class="gameCanvas">
                 <canvas id="gameCanvas" class="game"></canvas>
+                <div class="gameScore">
+                    <span id="scoreText" class="score">0</span>
+                </div>
+                <div id="gameOver" class="gameOver">
+                    <h1>Game Over</h1>
+                    <button id="restart" class="restart" onclick="restartGame()">Restart</button>
+                </div>
+                <div class="gamePlay" id="gamePlay">
+                    <button id="playButton" onclick="main()">Play</button>
+                </div>
             </div>
-            <div id="gameOver" class="gameOver">
-                <h1>Game Over</h1>
-                <p id="score" class="score"></p>
-                <button id="restart" class="restart">Restart</button>
+            <div class="gameButtons">
+                <div class="gameButtonsCol">
+                    <button class="gameButton up">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </button>
+                </div>
+                <div class="gameButtonsCol">
+                    <button class="gameButton left">
+                        <i class="bi bi-caret-left-fill"></i>
+                    </button>
+                    <button class="gameButton air" disabled></button>
+                    <button class="gameButton right">
+                        <i class="bi bi-caret-right-fill"></i>
+                    </button>
+                </div>
+                <div class="gameButtonsCol">
+                    <button class="gameButton down">
+                        <i class="bi bi-caret-down-fill"></i>
+                    </button>
+                </div>
             </div>
         </section>
     </main>
